@@ -1,4 +1,4 @@
-<h1 class="h1-text">주문자를 선택해주세요</h1>
+<h1 class="h1-text">Please select your screen.</h1>
 
 <style>
     .h1-text {

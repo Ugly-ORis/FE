@@ -7,6 +7,8 @@
         background-color: #E6A399;
         margin: 0;
         padding: 0;
+        user-select: none;
+        -webkit-user-drag: none;
     }
 
     header {
@@ -14,9 +16,13 @@
         align-items: center;
         padding: 1rem;
     }
+    .logo, .ice-cream {
+        pointer-events: none; 
+        user-select: none;
+    }
 
     .logo {
-        width: 200px; /* 로고 크기를 키움 */
+        width: 200px; 
         height: auto;
         margin-left: 3rem;
     }
@@ -28,7 +34,7 @@
     }
 
     .ice-cream {
-        width: 200px; /* 아이스크림 로고 크기를 줄임 */
+        width: 200px; 
         height: auto;
         opacity: 0.8;
     }
