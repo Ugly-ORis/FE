@@ -1,38 +1,58 @@
-# sv
+# Oris Ice-cream shop ui
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+This is a SvelteKit project for Oris Ice-cream shop ui. Follow the instructions below to set up, develop, and build the project.
 
-## Creating a project
+## Prerequisites
 
-If you're seeing this, you've probably already done this step. Congrats!
+- [Node.js](https://nodejs.org/) installed
+- (Optional) [pnpm](https://pnpm.io/) or [yarn](https://yarnpkg.com/) if you prefer those over npm
 
-```bash
-# create a new project in the current directory
-npx sv create
+## Getting Started
 
-# create a new project in my-app
-npx sv create my-app
-```
+1. **Clone the repository** and navigate to the project directory.
 
-## Developing
+    ```bash
+    git clone https://github.com/your-username/my-svelte-project.git
+    cd my-svelte-project
+    ```
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+2. **Install dependencies**.
 
-```bash
-npm run dev
+    Using npm:
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+    ```bash
+    npm install
+    ```
 
-## Building
+    Or with pnpm:
 
-To create a production version of your app:
+    ```bash
+    pnpm install
+    ```
+
+    Or with yarn:
+
+    ```bash
+    yarn install
+    ```
+
+3. **Start the development server**.
+
+    Using npm:
+
+    ```bash
+    npm run dev
+    ```
+
+    The app will be served on `http://localhost:5173` by default. You can also open the app directly in a new browser tab:
+
+    ```bash
+    npm run dev -- --open
+    ```
+
+## Building for Production
+
+To create a production-ready build of the app, use the following command:
 
 ```bash
 npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
