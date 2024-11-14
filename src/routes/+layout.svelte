@@ -5,6 +5,7 @@
     :global(body) {
         font-family: 'Rounded Mplus 1c', sans-serif;
         background-color: #E6A399;
+        color: #662C2E;
         margin: 0;
         padding: 0;
         user-select: none;
@@ -42,7 +43,6 @@
     main {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 1rem;
         display: flex;
         flex-direction: column;
         align-items: center;

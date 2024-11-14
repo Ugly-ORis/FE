@@ -2,32 +2,21 @@
     import SelectableItem from '$lib/components/SelectableItem.svelte';
     import Modal from '$lib/components/Modal.svelte';
     import { ShoppingBagIcon } from 'heroicons-svelte/24/solid';
+    import { XCircleIcon } from 'heroicons-svelte/24/outline';
+    import type { IceCream } from '$lib/service/iceCreamService';
+    import type { PageData } from './$types';
 
-    interface Item {
-        id: number;
-        title: string;
-        image: string;
-    }
-
-    interface ListItem {
-        title: string;
-        details: string;
-    }
-
-    let items: Item[] = [
-        { id: 1, title: "Chocolate", image: "/ice-cream-ex-1.png" },
-        { id: 2, title: "Strawberry", image: "/ice-cream-ex-2.png" },
-        { id: 3, title: "Vanilla", image: "/ice-cream-ex-3.png" }
-    ];
+    let { data }: { data: PageData } = $props();
 
     let options: string[] = ["Nuts", "Sprinkles", "Whipped Cream", "Chocolate Syrup", "Caramel"];
-    let selectedItem: Item | null = null;
+    let selectedItem: IceCream | null = null;
     let selectedOptions: string[] = [];
     let showModal: boolean = false;
-    let cart: ListItem[] = [];
+    let cart: { title: string; details: string }[] = [];
     let showCart: boolean = false;
 
-    function handleSelect(event: CustomEvent<{ item: Item }>) {
+
+    function handleSelect(event: CustomEvent<{ item: IceCream }>) {
         selectedItem = event.detail.item;
         selectedOptions = [];
         showModal = true;
@@ -37,7 +26,7 @@
         if (selectedItem) {
             cart = [
                 ...cart,
-                { title: selectedItem.title, details: event.detail.selectedOptions.join(", ") }
+                { title: selectedItem.name, details: event.detail.selectedOptions.join(", ") }
             ];
             showModal = false;
         }
@@ -56,33 +45,55 @@
     }
 </script>
 
-<h1>Select Your Item</h1>
 <div class="item-grid">
-    {#each items as item}
-        <SelectableItem {item} on:select={handleSelect} />
+    {#each (data.items as any) as item}
+        <SelectableItem 
+            item={{
+                id: item.ice_cream_id,
+                title: item.name,
+                image: `data:image/png;base64,${item.image_data}`,
+                price: item.price,
+                flavor: item.flavor
+            }} 
+            on:select={handleSelect} 
+        />
     {/each}
 </div>
 
 <!-- 장바구니 탭 -->
-<button class="cart-tab" on:mouseenter={() => showCart = true} on:mouseleave={() => showCart = false}>
-        <ShoppingBagIcon style="width: 80px; height: 80px; color: black;" />
+<div class="cart-container" on:mouseenter={() => showCart = true} on:mouseleave={() => showCart = false}>
+    <button class="cart-tab">
+        <div class="icon-container">
+            <ShoppingBagIcon class="cart-icon" />
+        </div>
+        <span class="cart-text">장바구니 보기</span>
+    </button>
 
     {#if showCart}
     <div class="cart-content">
         {#each cart as item, index}
             <div class="cart-item">
-                <h3>{item.title}</h3>
-                <p>옵션: {item.details || "None"}</p>
-                <button class="remove-btn" on:click={() => handleRemoveFromCart(index)}>삭제</button>
+                <button class="remove-btn" on:click={() => handleRemoveFromCart(index)}>
+                    <XCircleIcon class="remove-icon" />
+                </button>
+                <div class="cart-details">
+                    <div class="ice-cream-card">
+                        <h3>맛: {item.title}</h3>
+                    </div>
+                    <div class="separator">|</div>
+                    <div class="topping-card">
+                        <p>토핑: {item.details || "없음"}</p>
+                    </div>
+                </div>
             </div>
         {/each}
         <button class="checkout-btn" on:click={handleCheckout}>결제하기</button>
     </div>
     {/if}
-</button>
+</div>
 
 {#if showModal}
-    <Modal title={selectedItem?.title || ''} options={options} selectedOptions={selectedOptions} on:confirm={handleAddToCart} on:close={closeModal} />
+    <Modal title={selectedItem?.name || ''} options={options} selectedOptions={selectedOptions} on:confirm={handleAddToCart} on:close={closeModal} />
 {/if}
 
 <style>
@@ -95,44 +106,59 @@
         padding: 1.5rem;
     }
 
-    .cart-tab {
+    .cart-container {
         position: fixed;
-        top: 1rem;
-        right: 1rem;
+        bottom: 4rem;
+        right: 16.5rem;
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        background: transparent;
-        border-radius: 8px;
-        overflow: hidden;
-        transition: all 0.3s ease;
+        flex-direction: row;
+        align-items: center;
     }
 
-    .cart-button {
-        background-color: #f1dcd9;
-        color: #333;
-        padding: 0.8rem 1rem;
-        font-size: 1rem;
-        border: none;
-        cursor: pointer;
-        font-weight: bold;
-        white-space: nowrap;
+    .cart-tab {
         display: flex;
         align-items: center;
-        border-radius: 8px;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        background-color: #FFF5F2;
+        border: 1px solid #FFF5F2;
+        border-radius: 10px;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    .icon-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 50px;
+        width: 50px;
+    }
+
+    .cart-text {
+        margin-left: 0.5rem;
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: #662C2E;
+        white-space: nowrap;
     }
 
     .cart-content {
+        position: absolute;
+        bottom: 61.5px;
+        right: 0;
         padding: 1rem;
-        width: 250px;
         display: flex;
         flex-direction: column;
-        background: white;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        background: #FFF5F2;
+        transform-origin: bottom right;
+        transition: all 0.3s ease;
+        flex-wrap: wrap;
+        width: 420px;
     }
 
-
     .cart-item {
+        position: relative;
         display: flex;
         flex-direction: column;
         margin-bottom: 1rem;
@@ -140,27 +166,48 @@
         background-color: #fff;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        width: 100%;
     }
 
-    .remove-btn {
-        background-color: #f44336;
-        color: white;
-        border: none;
-        padding: 0.4rem;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 0.8rem;
-        margin-top: 0.5rem;
+    .cart-details {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .ice-cream-card, .topping-card {
+        flex: 1;
+        padding: 0.5rem;
+        background-color: #FFF5F2;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .separator {
+        font-weight: bold;
+        color: #666;
     }
 
     .checkout-btn {
         width: 100%;
         padding: 0.6rem;
-        background-color: #4CAF50;
-        color: white;
+        background-color: #E6A399;
         border: none;
-        border-radius: 4px;
+        border-radius: 3px;
         cursor: pointer;
+        font-size: 1rem;
         font-weight: bold;
+    }
+
+    .remove-btn {
+        position: absolute;
+        width: 32px;
+        top: 2px;
+        right: 2px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
     }
 </style>
