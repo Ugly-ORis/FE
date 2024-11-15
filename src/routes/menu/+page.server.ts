@@ -6,7 +6,6 @@ export const load: PageServerLoad = async ({ url }) => {
     const pageSize = Number(url.searchParams.get('pageSize') || 10);
 
     const data = await getIceCreams(page, pageSize);
-    console.log('from page.server.ts', data);
 
     return {
         items: data

@@ -15,7 +15,6 @@
     let cart: { title: string; details: string }[] = [];
     let showCart: boolean = false;
 
-
     function handleSelect(event: CustomEvent<{ item: IceCream }>) {
         selectedItem = event.detail.item;
         selectedOptions = [];
@@ -51,7 +50,7 @@
             item={{
                 id: item.ice_cream_id,
                 title: item.name,
-                image: `data:image/png;base64,${item.image_data}`,
+                image: `data:image/png;base64,${item.image}`,
                 price: item.price,
                 flavor: item.flavor
             }} 

@@ -12,7 +12,7 @@
 <div class="card" on:click={handleClick}>
     <img src={item.image} alt={item.title} class="card-image" />
     <h2 class="card-title">{item.title}</h2>
-    <p class="card-flavor">Flavor: {item.flavor}</p>
+    <p class="card-flavor">{item.flavor}</p>
     <p class="card-price">Price: ${item.price}</p>
 </div>
 <style>

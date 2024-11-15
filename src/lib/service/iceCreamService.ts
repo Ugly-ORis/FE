@@ -5,7 +5,7 @@ export interface IceCream {
   name: string;
   flavor: string;
   price: number;
-  image_data?: number[];
+  image?: string;
 }
 
 export interface PaginatedIceCreamResponse {
