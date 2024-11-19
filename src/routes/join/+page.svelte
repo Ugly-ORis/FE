@@ -1,14 +1,34 @@
 <script>
+    import { createCustomer } from './customerService';
+    import { onMount } from 'svelte';
+
     let name = "";
     let phone = "";
-
     $: isFormValid = name.trim() && phone.trim().length === 4;
+
+    async function handleSubmit() {
+        if (isFormValid) {
+            const customer = {
+                name,
+                phone_last_digits: phone,
+                created_at: new Date(),
+                feature_vector: [0.1, 0.2, 0.3] // 예시 feature vector
+            };
+
+            try {
+                const response = await createCustomer(customer);
+                console.log('Customer created:', response);
+            } catch (error) {
+                console.error('Failed to create customer:', error);
+            }
+        }
+    }
 </script>
 
 <h1 class="h1-text">Welcome to ORiS!</h1> 
 <h3>달콤함을 찾는 첫 걸음, ORiS에서 특별한 혜택을 만나보세요.</h3>
 <br/>
-<form on:submit|preventDefault={() => isFormValid && console.log("Form submitted!")}>
+<form on:submit|preventDefault={handleSubmit}>
     <div class="form-group">
         <label for="name">이름</label>
         <input type="text" id="name" bind:value={name} placeholder="Enter your name" required />

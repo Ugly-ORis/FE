@@ -4,7 +4,11 @@
     import { ShoppingBagIcon } from 'heroicons-svelte/24/solid';
     import { XCircleIcon } from 'heroicons-svelte/24/outline';
     import type { IceCream } from '$lib/service/iceCreamService';
+    import type { Topping } from '$lib/service/toppingService';
     import type { PageData } from './$types';
+    import { getIceCreams } from '$lib/service/iceCreamService';
+    import { getToppings } from '$lib/service/toppingService';
+
 
     let { data }: { data: PageData } = $props();
 
@@ -45,7 +49,7 @@
 </script>
 
 <div class="item-grid">
-    {#each (data.items as any) as item}
+    {#each (data as any) as item}
         <SelectableItem 
             item={{
                 id: item.ice_cream_id,
@@ -60,6 +64,7 @@
 </div>
 
 <!-- 장바구니 탭 -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="cart-container" on:mouseenter={() => showCart = true} on:mouseleave={() => showCart = false}>
     <button class="cart-tab">
         <div class="icon-container">
