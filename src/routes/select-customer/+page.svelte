@@ -3,7 +3,7 @@
     import { goto } from '$app/navigation';
     import { sendImageAndGetResult } from '$lib/service/customerService';
 
-    let videoFeedUrl = "http://localhost:8080/customers/video_feed";
+    let videoFeedUrl = "http://localhost:8080/customers/video";
     let canvas: HTMLCanvasElement;
 
     onMount(() => {
