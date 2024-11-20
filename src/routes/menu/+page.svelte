@@ -5,31 +5,45 @@
     import { XCircleIcon } from 'heroicons-svelte/24/outline';
     import type { IceCream } from '$lib/service/iceCreamService';
     import type { PageData } from './$types';
+	import type { Topping } from '$lib/service/toppingService';
 
     let { data }: { data: PageData } = $props();
 
-    let options: string[] = ["Nuts", "Sprinkles", "Whipped Cream", "Chocolate Syrup", "Caramel"];
-    let selectedItem: IceCream | null = null;
-    let selectedOptions: string[] = [];
-    let showModal: boolean = false;
-    let cart: { title: string; details: string }[] = [];
-    let showCart: boolean = false;
+    let selectedItem = $state<IceCream | null>(null);
+    let selectedOptions = $state<Topping[]>([]);
+    let showModal = $state(false);
+    let cart = $state<{ title: string; details: string, totalPrice: number, image?: string }[]>([]);
+    let showCart = $state(false);
 
-    function handleSelect(event: CustomEvent<{ item: IceCream }>) {
-        selectedItem = event.detail.item;
-        selectedOptions = [];
+    function handleSelect(iceCreamItem: IceCream) {
+        selectedItem = iceCreamItem;
         showModal = true;
     }
 
-    function handleAddToCart(event: CustomEvent<{ selectedOptions: string[] }>) {
+    function handleAddToCart(event: CustomEvent<{ selectedOptions: Topping[] }>) {
         if (selectedItem) {
+            const selectedToppings = data.toppingData.filter(topping =>
+                event.detail.selectedOptions.some(selected => selected === topping)
+            );
+
+            const toppingPrices = selectedToppings.reduce((total, topping) => total + topping.extra_price, 0);
+
+            const totalPrice = selectedItem.price + toppingPrices;
+
             cart = [
                 ...cart,
-                { title: selectedItem.name, details: event.detail.selectedOptions.join(", ") }
+                {
+                    title: selectedItem.name,
+                    details: selectedToppings.map(t => `${t.name} (₩${t.extra_price.toLocaleString()})`).join(", "),
+                    totalPrice,
+                    image: selectedItem.image,
+                }
             ];
+
             showModal = false;
         }
     }
+
 
     function handleRemoveFromCart(index: number) {
         cart = cart.filter((_, i) => i !== index);
@@ -45,21 +59,19 @@
 </script>
 
 <div class="item-grid">
-    {#each (data.items as any) as item}
+    {#each (data.iceCreamData as any) as item}
         <SelectableItem 
             item={{
                 id: item.ice_cream_id,
                 title: item.name,
                 image: `data:image/png;base64,${item.image}`,
-                price: item.price,
-                flavor: item.flavor
+                price: item.price
             }} 
-            on:select={handleSelect} 
+            on:select={() => handleSelect(item)} 
         />
     {/each}
 </div>
 
-<!-- 장바구니 탭 -->
 <div class="cart-container" on:mouseenter={() => showCart = true} on:mouseleave={() => showCart = false}>
     <button class="cart-tab">
         <div class="icon-container">
@@ -72,18 +84,28 @@
     <div class="cart-content">
         {#each cart as item, index}
             <div class="cart-item">
+                <img class="cart-ice-cream-image" src={`data:image/png;base64,${item?.image}`} alt={item.title} />
+                <div class="cart-details">
+                    <h3 class="cart-title">{item.title}</h3>
+                    <div class="cart-toppings">
+                        <p class="cart-topping-title">토핑:</p>
+                        {#if item.details}
+                            <ul>
+                                {#each item.details.split(", ") as topping}
+                                    <li>{topping}</li>
+                                {/each}
+                            </ul>
+                        {:else}
+                            <p>없음</p>
+                        {/if}
+                    </div>
+                    <div class="cart-price">
+                        <p>가격: ₩{item.totalPrice.toLocaleString()}</p>
+                    </div>
+                </div>
                 <button class="remove-btn" on:click={() => handleRemoveFromCart(index)}>
                     <XCircleIcon class="remove-icon" />
                 </button>
-                <div class="cart-details">
-                    <div class="ice-cream-card">
-                        <h3>맛: {item.title}</h3>
-                    </div>
-                    <div class="separator">|</div>
-                    <div class="topping-card">
-                        <p>토핑: {item.details || "없음"}</p>
-                    </div>
-                </div>
             </div>
         {/each}
         <button class="checkout-btn" on:click={handleCheckout}>결제하기</button>
@@ -91,14 +113,24 @@
     {/if}
 </div>
 
+<!-- 팝업 -->
 {#if showModal}
-    <Modal title={selectedItem?.name || ''} options={options} selectedOptions={selectedOptions} on:confirm={handleAddToCart} on:close={closeModal} />
+<Modal 
+    title={selectedItem?.name || ''}
+    image={`data:image/png;base64,${selectedItem?.image}`}
+    description={selectedItem?.flavor || ''}
+    price={selectedItem?.price || 0}
+    toppings={data.toppingData} 
+    selectedOptions={selectedOptions} 
+    on:confirm={(e) => handleAddToCart(e)} 
+    on:close={closeModal}
+/>
 {/if}
 
 <style>
     .item-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 1.5rem;
         max-width: 1000px;
         margin: 0 auto;
@@ -113,7 +145,9 @@
         flex-direction: row;
         align-items: center;
     }
-
+    .cart-title {
+        width: 90%;
+    }
     .cart-tab {
         display: flex;
         align-items: center;
@@ -125,7 +159,6 @@
         cursor: pointer;
         z-index: 10;
     }
-
     .icon-container {
         display: flex;
         align-items: center;
@@ -133,7 +166,6 @@
         height: 50px;
         width: 50px;
     }
-
     .cart-text {
         margin-left: 0.5rem;
         font-size: 1.4rem;
@@ -153,41 +185,48 @@
         transform-origin: bottom right;
         transition: all 0.3s ease;
         flex-wrap: wrap;
-        width: 420px;
+        width: 730px; 
     }
 
     .cart-item {
-        position: relative;
         display: flex;
-        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
         margin-bottom: 1rem;
-        padding: 0.5rem;
-        background-color: #fff;
+        padding: 0.75rem;
+        background-color: #ffffff;
         border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        width: 100%;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        min-height: 110px;
+        height: 140px;
+    }
+    .cart-ice-cream-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
     }
 
     .cart-details {
         display: flex;
         flex-direction: row;
         align-items: center;
+        flex-grow: 1;
         gap: 1rem;
     }
-
-    .ice-cream-card, .topping-card {
-        flex: 1;
-        padding: 0.5rem;
-        background-color: #FFF5F2;
-        border-radius: 8px;
-        text-align: center;
+    .cart-price {
+        font-size: 1rem;
+        color: #777;
+    }
+    .cart-toppings {
+        width: 100%;
+        text-align: left; 
     }
 
-    .separator {
-        font-weight: bold;
-        color: #666;
+    .cart-toppings li {
+        list-style-type: disc;
     }
-
+    
     .checkout-btn {
         width: 100%;
         padding: 0.6rem;
@@ -198,12 +237,10 @@
         font-size: 1rem;
         font-weight: bold;
     }
-
     .remove-btn {
         position: absolute;
-        width: 32px;
-        top: 2px;
-        right: 2px;
+        width: 42px;
+        right: 20px;
         background: none;
         border: none;
         cursor: pointer;
