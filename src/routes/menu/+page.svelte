@@ -4,8 +4,8 @@
     import { ShoppingBagIcon } from 'heroicons-svelte/24/solid';
     import { XCircleIcon } from 'heroicons-svelte/24/outline';
     import type { IceCream } from '$lib/service/iceCreamService';
+    import type { Topping } from '$lib/service/toppingService';
     import type { PageData } from './$types';
-	import type { Topping } from '$lib/service/toppingService';
 
     let { data }: { data: PageData } = $props();
 
@@ -44,7 +44,6 @@
         }
     }
 
-
     function handleRemoveFromCart(index: number) {
         cart = cart.filter((_, i) => i !== index);
     }
@@ -72,10 +71,12 @@
     {/each}
 </div>
 
+<!-- 장바구니 탭 -->
 <div class="cart-container" on:mouseenter={() => showCart = true} on:mouseleave={() => showCart = false}>
     <button class="cart-tab">
         <div class="icon-container">
             <ShoppingBagIcon class="cart-icon" />
+            <div class="badge">{cart.length}</div>
         </div>
         <span class="cart-text">장바구니 보기</span>
     </button>
@@ -160,6 +161,7 @@
         z-index: 10;
     }
     .icon-container {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -172,6 +174,26 @@
         font-weight: bold;
         color: #662C2E;
         white-space: nowrap;
+    }
+
+    .badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        transform: translate(50%, -50%);
+        background-color: #e05742;
+        color: white;
+        font-size: 1.05rem;
+        font-weight: bold;
+        padding: 0.2rem 0.4rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.5rem;
+        height: 1.5rem;
+        z-index: 20;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .cart-content {
@@ -228,7 +250,8 @@
     }
     
     .checkout-btn {
-        width: 100%;
+        width: 98%;
+        margin: 0 auto;
         padding: 0.6rem;
         background-color: #E6A399;
         border: none;

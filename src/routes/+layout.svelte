@@ -1,7 +1,11 @@
+<!-- layout.svelte -->
 <script>
-</script>
-
-<style>
+    import { page } from '$app/stores';
+  
+    $: isOrderNumberPage = $page.url.pathname === '/order_number';
+  </script>
+  
+  <style>
     :global(body) {
         font-family: 'Rounded Mplus 1c', sans-serif;
         background-color: #E6A399;
@@ -54,18 +58,24 @@
         flex-direction: column;
         min-height: 100vh;
     }
-</style>
 
-<div class="container">
-    <header>
-        <img src="/logo.png" alt="Logo" class="logo" />
+    .hidden {
+        display: none; /* 숨기기 */
+    }
+    
+</style>
+  <div class="container">
+
+    <header class="{isOrderNumberPage ? 'hidden' : ''}">
+      <img src="/logo.png" alt="Logo" class="logo" />
     </header>
-    
+  
     <main>
-        <slot />
+      <slot/>
     </main>
-    
-    <footer>
+  
+      <footer class="{isOrderNumberPage ? 'hidden' : ''}">
         <img src="/ice-cream.png" alt="Ice Cream Logo" class="ice-cream" />
-    </footer>
-</div>
+      </footer>
+  </div>
+  

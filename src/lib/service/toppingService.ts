@@ -18,4 +18,3 @@ export const getToppings = async (
   });
   return response.data;
 };
-
