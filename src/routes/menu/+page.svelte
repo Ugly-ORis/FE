@@ -6,6 +6,8 @@
     import type { IceCream } from '$lib/service/iceCreamService';
     import type { Topping } from '$lib/service/toppingService';
     import type { PageData } from './$types';
+	import ConfirmationModal from '$lib/components/ConfirmationModal.svelte';
+	import { goto } from '$app/navigation';
 
     let { data }: { data: PageData } = $props();
 
@@ -14,6 +16,7 @@
     let showModal = $state(false);
     let cart = $state<{ title: string; details: string, totalPrice: number, image?: string }[]>([]);
     let showCart = $state(false);
+    let showConfirmationModal = $state(false);
 
     function handleSelect(iceCreamItem: IceCream) {
         selectedItem = iceCreamItem;
@@ -48,13 +51,30 @@
         cart = cart.filter((_, i) => i !== index);
     }
 
-    function handleCheckout(): void {
-        console.log("Checking out with items:", cart);
+    async function handleCheckout(): Promise<void> {
+        showConfirmationModal = true; // 모달 표시
     }
+
+    async function handleConfirmCheckout(): Promise<void> {
+    try {
+        cart = [];
+        goto(`/checkout/3`);
+    } catch (error) {
+        console.error('결제 오류:', error);
+        alert('결제 중 문제가 발생했습니다.');
+    } finally {
+        
+    }
+}
 
     function closeModal(): void {
         showModal = false;
     }
+
+    function closeConfirmationModal(): void {
+        showConfirmationModal = false;
+    }
+
 </script>
 
 <div class="item-grid">
@@ -127,6 +147,18 @@
     on:close={closeModal}
 />
 {/if}
+
+{#if showConfirmationModal}
+    <ConfirmationModal 
+        title="결제하시겠습니까?" 
+        onConfirm={async () => {
+            await handleConfirmCheckout();
+        }} 
+        onClose={closeConfirmationModal} 
+    />
+{/if}
+
+
 
 <style>
     .item-grid {
