@@ -136,7 +136,7 @@
 
         .button-container {
             max-width: 700px; 
-            gap: 40px;
+            gap: 45px;
         }
     }
 
@@ -158,7 +158,7 @@
         }
 
         .button-container {
-            gap: 20px;
+            gap: 40px;
         }
     }
 </style>
