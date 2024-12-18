@@ -45,7 +45,7 @@
         display: flex;
         justify-content: center;
         margin-bottom: 20px;
-        min-height: 360px;
+        min-height: 340px;
     }
 
     .video-feed {
@@ -63,7 +63,7 @@
         max-width: 800px; /* 최대 너비 제한 */
         margin: 0 auto;
         flex-wrap: nowrap; /* 줄바꿈 없음 */
-        gap: 15px;
+        gap: 40px;
     }
 
     .control-buttons {
@@ -117,10 +117,9 @@
         background-color: #D28E4E;
     }
 
-    /* 반응형 크기 조정 */
     @media (max-width: 768px) {
         .video-feed {
-            width: 500px; /* 작은 화면에서 적당히 줄임 */
+            width: 500px;
         }
 
         .control-btn {
