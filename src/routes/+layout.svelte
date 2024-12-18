@@ -8,7 +8,6 @@
   <style>
     :global(body) {
         font-family: 'Rounded Mplus 1c', sans-serif;
-        background-color: #E6A399;
         color: #662C2E;
         margin: 0;
         padding: 0;
@@ -27,9 +26,9 @@
     }
 
     .logo {
-        width: 200px; 
+        width: 180px; 
         height: auto;
-        margin-left: 3rem;
+        margin: 0 auto;
     }
 
     footer {
@@ -67,15 +66,12 @@
   <div class="container">
 
     <header class="{isOrderNumberPage ? 'hidden' : ''}">
-      <img src="/logo.png" alt="Logo" class="logo" />
+      <img src="/ORiS.png" alt="Logo" class="logo" />
     </header>
   
     <main>
       <slot/>
     </main>
   
-      <footer class="{isOrderNumberPage ? 'hidden' : ''}">
-        <img src="/ice-cream.png" alt="Ice Cream Logo" class="ice-cream" />
-      </footer>
   </div>
   
