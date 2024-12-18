@@ -53,16 +53,16 @@
         height: auto;
         border: 3px solid #86e1e2;
         border-radius: 8px;
-        max-width: 90%; /* 화면 크기에 맞게 줄어듦 */
+        max-width: 90%;
     }
 
     .button-container {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        max-width: 800px; /* 최대 너비 제한 */
+        max-width: 800px; 
         margin: 0 auto;
-        flex-wrap: nowrap; /* 줄바꿈 없음 */
+        flex-wrap: nowrap;
         gap: 40px;
     }
 
@@ -135,14 +135,14 @@
         }
 
         .button-container {
-            max-width: 700px; /* 전체 크기를 조금 줄임 */
-            gap: 10px;
+            max-width: 700px; 
+            gap: 40px;
         }
     }
 
     @media (max-width: 480px) {
         .video-feed {
-            width: 400px; /* 더 작은 화면에 맞춤 */
+            width: 400px;
         }
 
         .control-btn {
@@ -158,7 +158,7 @@
         }
 
         .button-container {
-            gap: 8px;
+            gap: 20px;
         }
     }
 </style>
