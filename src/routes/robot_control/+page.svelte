@@ -1,75 +1,48 @@
 <script lang="ts">
-    import { onMount, onDestroy } from 'svelte';
+    import { onMount } from 'svelte';
 
-    let videoFeedUrl = "http://localhost:8080/customers/video";
+    // 상태 변수
+    let commandQueue: string = "";
     let raspberryStatus: string = "연결되지 않음";
-    let connected = false;
-    let raspberrySocket: WebSocket;
 
+    // 명령 저장
+    const saveCommand = (command: string) => {
+        console.log(`명령 저장됨: ${command}`);
+        commandQueue = command;
+    };
+
+    // Raspberry Pi가 명령 확인
+    const getCommand = () => {
+        const command = commandQueue;
+        commandQueue = ""; // 명령 초기화
+        return { command };
+    };
+
+    // Raspberry Pi가 상태 업데이트
+    const updateStatus = (status: string, lastCommand: string) => {
+        raspberryStatus = `상태: ${status}, 마지막 명령: ${lastCommand}`;
+        console.log(`상태 업데이트: ${status}, ${lastCommand}`);
+    };
+
+    // Raspberry Pi가 주기적으로 Polling 요청을 받을 수 있도록 처리
     onMount(() => {
-        // WebSocket 서버 시작 (Netlify WebSocket Server 역할)
-        const server = new WebSocket('wss://symphonious-paletas-d1c475.netlify.app/robot_control');
-
-        server.onopen = () => {
-            console.log('Raspberry Pi가 연결됨');
-            raspberryStatus = '연결됨';
-            connected = true;
-        };
-
-        server.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log('수신된 메시지:', data);
-
-            if (data.status === 'success') {
-                raspberryStatus = `명령 수행됨: ${data.direction || data.action}`;
-            } else if (data.status === 'connected') {
-                raspberryStatus = 'Raspberry Pi 연결됨';
-            }
-        };
-
-        server.onerror = (error) => {
-            console.error('WebSocket 오류:', error);
-            raspberryStatus = "오류 발생";
-        };
-
-        server.onclose = () => {
-            console.log('WebSocket 연결 종료');
-            raspberryStatus = "연결 종료됨";
-            connected = false;
-        };
-
-        raspberrySocket = server;
+        (window as any).getCommand = getCommand;
+        (window as any).updateStatus = updateStatus;
     });
 
-    onDestroy(() => {
-        if (raspberrySocket) {
-            raspberrySocket.close();
-        }
-    });
-
+    // 버튼 클릭 이벤트
     const handleControl = (direction: string) => {
-        if (connected) {
-            raspberrySocket.send(JSON.stringify({ event: 'control', direction }));
-            console.log(`${direction} 명령 전송됨`);
-        } else {
-            console.error('Raspberry Pi와 연결되지 않았습니다.');
-        }
+        console.log(`버튼 클릭됨: ${direction}`);
+        saveCommand(direction);
     };
 
     const handleAction = (action: string) => {
-        if (connected) {
-            raspberrySocket.send(JSON.stringify({ event: 'action', action }));
-            console.log(`${action} 명령 전송됨`);
-        } else {
-            console.error('Raspberry Pi와 연결되지 않았습니다.');
-        }
+        console.log(`버튼 클릭됨: ${action}`);
+        saveCommand(action);
     };
 </script>
 
-<div class="video-container">
-    <img src={videoFeedUrl} alt="Video Feed" class="video-feed" />
-</div>
-
+<!-- 화면 UI -->
 <div class="status">
     Raspberry Pi 상태: {raspberryStatus}
 </div>
@@ -84,13 +57,11 @@
         </div>
         <button on:click={() => handleControl("down")} class="control-btn">▼</button>
     </div>
-
     <div class="action-buttons">
         <button on:click={() => handleAction("action1")} class="action-btn">네모 버튼 1</button>
         <button on:click={() => handleAction("action2")} class="action-btn">네모 버튼 2</button>
     </div>
 </div>
-
 <style>
     /* 비디오 컨테이너 */
     .video-container {
