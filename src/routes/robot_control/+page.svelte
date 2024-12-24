@@ -1,20 +1,68 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
 
     let videoFeedUrl = "http://localhost:8080/customers/video";
-    let canvas: HTMLCanvasElement;
+    let raspberryStatus: string = "연결되지 않음";
+    let connected = false;
+    let raspberrySocket: WebSocket;
 
     onMount(() => {
-        canvas = document.createElement('canvas');
-        document.body.appendChild(canvas);
+        // WebSocket 서버 시작 (Netlify WebSocket Server 역할)
+        const server = new WebSocket('wss://symphonious-paletas-d1c475.netlify.app/robot_control');
+
+        server.onopen = () => {
+            console.log('Raspberry Pi가 연결됨');
+            raspberryStatus = '연결됨';
+            connected = true;
+        };
+
+        server.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('수신된 메시지:', data);
+
+            if (data.status === 'success') {
+                raspberryStatus = `명령 수행됨: ${data.direction || data.action}`;
+            } else if (data.status === 'connected') {
+                raspberryStatus = 'Raspberry Pi 연결됨';
+            }
+        };
+
+        server.onerror = (error) => {
+            console.error('WebSocket 오류:', error);
+            raspberryStatus = "오류 발생";
+        };
+
+        server.onclose = () => {
+            console.log('WebSocket 연결 종료');
+            raspberryStatus = "연결 종료됨";
+            connected = false;
+        };
+
+        raspberrySocket = server;
+    });
+
+    onDestroy(() => {
+        if (raspberrySocket) {
+            raspberrySocket.close();
+        }
     });
 
     const handleControl = (direction: string) => {
-        console.log(`${direction} 버튼 클릭됨`);
+        if (connected) {
+            raspberrySocket.send(JSON.stringify({ event: 'control', direction }));
+            console.log(`${direction} 명령 전송됨`);
+        } else {
+            console.error('Raspberry Pi와 연결되지 않았습니다.');
+        }
     };
 
     const handleAction = (action: string) => {
-        console.log(`${action} 버튼 클릭됨`);
+        if (connected) {
+            raspberrySocket.send(JSON.stringify({ event: 'action', action }));
+            console.log(`${action} 명령 전송됨`);
+        } else {
+            console.error('Raspberry Pi와 연결되지 않았습니다.');
+        }
     };
 </script>
 
@@ -22,20 +70,24 @@
     <img src={videoFeedUrl} alt="Video Feed" class="video-feed" />
 </div>
 
+<div class="status">
+    Raspberry Pi 상태: {raspberryStatus}
+</div>
+
 <div class="button-container">
     <div class="control-buttons">
-        <button on:click={() => handleControl("상")} class="control-btn">▲</button>
+        <button on:click={() => handleControl("up")} class="control-btn">▲</button>
         <div>
-            <button on:click={() => handleControl("좌")} class="control-btn">◀</button>
+            <button on:click={() => handleControl("left")} class="control-btn">◀</button>
             <button class="control-btn"></button>
-            <button on:click={() => handleControl("우")} class="control-btn">▶</button>
+            <button on:click={() => handleControl("right")} class="control-btn">▶</button>
         </div>
-        <button on:click={() => handleControl("하")} class="control-btn">▼</button>
+        <button on:click={() => handleControl("down")} class="control-btn">▼</button>
     </div>
 
     <div class="action-buttons">
-        <button on:click={() => handleAction("Action 1")} class="action-btn">네모 버튼 1</button>
-        <button on:click={() => handleAction("Action 2")} class="action-btn">네모 버튼 2</button>
+        <button on:click={() => handleAction("action1")} class="action-btn">네모 버튼 1</button>
+        <button on:click={() => handleAction("action2")} class="action-btn">네모 버튼 2</button>
     </div>
 </div>
 
